@@ -24,6 +24,7 @@ TEST_CASE("type traits")
     static_assert(Foo<8>::value == 16);
 
     Identity<int>::type x = 42;
+    static_assert(std::is_same_v<Identity<int>::type, int>);
 }
 
 ////////////////////////////////////////
