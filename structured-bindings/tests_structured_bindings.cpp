@@ -9,6 +9,9 @@
 #include <tuple>
 #include <vector>
 #include <array>
+#include <string_view>
+
+using namespace std::literals;
 
 namespace BeforeCpp17
 {
@@ -184,4 +187,62 @@ TEST_CASE("use cases")
             std::cout << "Item at index " << index << " - " << *it << "\n";
         }
     }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+enum Something
+{
+    some, 
+    thing
+};
+
+const std::map<Something, std::string_view> something_desc = {
+    { some, "some"sv}, {thing, "thing"sv}
+};
+
+// step 1 - std::tuple_size<Something>
+template <>
+struct std::tuple_size<Something>
+{
+    static constexpr size_t value = 2;
+};
+
+// step 2 - std::tuple_element<Index, Something>
+template <>
+struct std::tuple_element<0, Something>
+{
+    using type = int;
+};
+
+template <>
+struct std::tuple_element<1, Something>
+{
+    using type = std::string_view;
+};
+
+// step 3 - get<Index>
+template <size_t Index>
+decltype(auto) get(const Something& sth);
+
+template <>
+decltype(auto) get<0>(const Something& sth)
+{
+    return static_cast<int>(sth);
+}
+
+template <>
+decltype(auto) get<1>(const Something& sth)
+{
+    return something_desc.at(sth);
+}
+
+TEST_CASE("tuple-like protocol")
+{
+    Something sth = some;
+
+    const auto [value, description] = some;
+
+    REQUIRE(value == 0);
+    REQUIRE(description == "some"sv);
 }
