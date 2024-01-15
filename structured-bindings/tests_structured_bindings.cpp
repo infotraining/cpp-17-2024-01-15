@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
@@ -6,10 +7,9 @@
 #include <map>
 #include <numeric>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
-#include <array>
-#include <string_view>
 
 using namespace std::literals;
 
@@ -41,13 +41,13 @@ TEST_CASE("Before C++17")
     std::vector<int> data = {4, 42, 665, 1, 123, 13};
 
     int min, max;
-    //double avg;
+    // double avg;
 
     std::tie(min, max, std::ignore) = calc_stats(data);
 
     REQUIRE(min == 1);
     REQUIRE(max == Catch::Approx(665));
-    //REQUIRE(avg == Catch::Approx(141.333));
+    // REQUIRE(avg == Catch::Approx(141.333));
 }
 
 TEST_CASE("Since C++17 - structured bindings")
@@ -116,7 +116,7 @@ TEST_CASE("structured bindings")
     SECTION("std::array")
     {
         auto [x, y, z] = get_pos();
-        
+
         REQUIRE(x == 1);
         REQUIRE(y == 2);
         REQUIRE(z == 3);
@@ -161,11 +161,11 @@ TEST_CASE("structured bindings - how it works")
 TEST_CASE("use cases")
 {
     std::map<int, std::string> dict = {{1, "one"}, {2, "two"}};
-   
+
     SECTION("iteration over maps")
     {
 
-        for(const auto& [key, value] : dict)
+        for (const auto& [key, value] : dict)
         {
             std::cout << key << " - " << value << "\n";
         }
@@ -181,8 +181,8 @@ TEST_CASE("use cases")
     SECTION("many variables in for statement")
     {
         std::list<std::string> lst = {"zero", "one", "two", "three"};
-        
-        for(auto [index, it] = std::tuple(0, lst.begin()); it != lst.end(); ++it, ++index)
+
+        for (auto [index, it] = std::tuple(0, lst.begin()); it != lst.end(); ++it, ++index)
         {
             std::cout << "Item at index " << index << " - " << *it << "\n";
         }
@@ -193,13 +193,12 @@ TEST_CASE("use cases")
 
 enum Something
 {
-    some, 
+    some,
     thing
 };
 
 const std::map<Something, std::string_view> something_desc = {
-    { some, "some"sv}, {thing, "thing"sv}
-};
+    {some, "some"sv}, {thing, "thing"sv}};
 
 // step 1 - std::tuple_size<Something>
 template <>
@@ -245,4 +244,61 @@ TEST_CASE("tuple-like protocol")
 
     REQUIRE(value == 0);
     REQUIRE(description == "some"sv);
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+// enum class Bitfields : uint32_t
+// {
+//     value
+// };
+
+// TEST_CASE("split integer to bytes")
+// {
+//     Bitfields value{0b00000001'11100010'00000100'01001000};
+
+//     const auto [b1, b2, b3, b4] = value;
+
+//     CHECK(b1 == 0b00000001);
+//     CHECK(b2 == 0b11100010);
+//     CHECK(b3 == 0b00000100);
+//     CHECK(b4 == 0b01001000);
+// }
+
+///////////////////////////////////////////////////////////////////////////
+
+enum class Bitfields : uint32_t
+{
+    value
+};
+
+template <> struct std::tuple_size<Bitfields>
+{
+  static constexpr size_t value = 4;
+};
+
+template <size_t Index>
+struct std::tuple_element<Index, Bitfields>
+{
+  using type = uint8_t;
+};
+
+template <size_t Index>
+decltype(auto) get(const Bitfields& arg)
+{
+    return static_cast<uint8_t>(static_cast<uint32_t>(arg) >> ( (3 - Index) * 8 ) );
+}
+
+TEST_CASE("split integer to bytes")
+{
+    Bitfields value{0b00000001'11100010'00000100'01001000};
+
+    const auto [b1, b2, b3, b4] = value;
+
+    std::cout << b1 << " " << b2 << " " << b3 << " " << b4;
+
+    CHECK(b1 == 0b00000001);
+    CHECK(b2 == 0b11100010);
+    CHECK(b3 == 0b00000100);
+    CHECK(b4 == 0b01001000);
 }
