@@ -13,7 +13,7 @@
 
 using namespace std::literals;
 
-namespace BeforeCpp17
+namespace [[deprecated]] BeforeCpp17
 {
     auto calc_stats(const std::vector<int>& data)
     {
@@ -72,7 +72,7 @@ struct ErrorCode
     const char* m;
 };
 
-ErrorCode open_file()
+[[nodiscard]] ErrorCode open_file()
 {
     return ErrorCode{13, "file not found!"};
 }

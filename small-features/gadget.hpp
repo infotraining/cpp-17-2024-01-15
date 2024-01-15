@@ -3,7 +3,7 @@
 
 class Gadget
 {
-    static int gen_id;
+    static inline int gen_id;
 
     int id_ = ++gen_id;
 
