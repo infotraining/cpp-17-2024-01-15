@@ -70,24 +70,36 @@ TEST_CASE("ifs with mutex")
 //////////////////////////////////////////////////////////////////////////////////
 // constexpr if
 
+namespace BeforeCpp17
+{
+    template <typename T>
+    auto is_power_of_2(T value) -> std::enable_if_t<std::is_integral_v<T>, bool>
+    {
+        return value > 0 && (value & (value - 1)) == 0;
+    }
+
+    template <typename T>
+    auto is_power_of_2(T value) -> std::enable_if_t<std::is_floating_point_v<T>, bool>
+    {
+        int exponent;
+        const T mantissa = std::frexp(value, &exponent);
+        return mantissa == T(0.5);
+    }
+}
+
 template <typename T>
 bool is_power_of_2(T value)
 {
-    return value > 0 && (value & (value - 1)) == 0;
-}
-
-bool is_power_of_2(double value)
-{
-    int exponent;
-    const double mantissa = std::frexp(value, &exponent);
-    return mantissa == double(0.5);
-}
-
-bool is_power_of_2(float value)
-{
-    int exponent;
-    const float mantissa = std::frexp(value, &exponent);
-    return mantissa == float(0.5);
+    if constexpr(std::is_floating_point_v<T>)
+    {
+        int exponent;
+        const T mantissa = std::frexp(value, &exponent);
+        return mantissa == T(0.5);
+    } 
+    else 
+    {
+        return value > 0 && (value & (value - 1)) == 0;
+    }
 }
 
 TEST_CASE("constexpr if")
@@ -99,4 +111,23 @@ TEST_CASE("constexpr if")
 
     REQUIRE(is_power_of_2(8.0));
     REQUIRE(is_power_of_2(8.0f));
+}
+
+template <size_t Size>
+auto create_buffer()
+{
+    if constexpr(Size < 512)
+    {
+        return std::array<int, Size>{};
+    }
+    else
+    {
+        return std::vector<int>(Size);
+    }
+}
+
+TEST_CASE("auto + constexpr if")
+{
+    auto buffer_A = create_buffer<128>();   // std::array<int, 128>{}
+    auto buffer_b = create_buffer<1024>();  // std::vector<int>(128)
 }
