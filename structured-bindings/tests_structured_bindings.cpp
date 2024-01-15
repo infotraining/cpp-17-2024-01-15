@@ -26,7 +26,7 @@ namespace BeforeCpp17
 template <typename TContainer>
 auto calc_stats(const TContainer& data)
 {
-    auto [min_pos, max_pos] = std::minmax_element(std::begin(data), std::end(data));
+    const auto [min_pos, max_pos] = std::minmax_element(std::begin(data), std::end(data));
 
     double avg = std::accumulate(std::begin(data), std::end(data), 0.0) / std::size(data); // since C++17 - std::size
 
@@ -51,7 +51,7 @@ TEST_CASE("Since C++17 - structured bindings")
 {
     int data[] = {4, 42, 665, 1, 123, 13};
 
-    auto [min, max, avg] = calc_stats(data);
+    const auto [min, max, avg] = calc_stats(data);
 
     REQUIRE(min == 1);
     REQUIRE(max == Catch::Approx(665));
@@ -80,7 +80,7 @@ TEST_CASE("structured bindings")
     {
         int pos[3] = {10, 20, 30};
 
-        auto [x, y, z] = pos;
+        auto& [x, y, z] = pos;
 
         x += 2;
 
@@ -88,7 +88,7 @@ TEST_CASE("structured bindings")
         REQUIRE(y == 20);
         REQUIRE(z == 30);
 
-        REQUIRE(pos[0] == 10);
+        REQUIRE(pos[0] == 12);
     }
 
     SECTION("std::pair")
@@ -104,7 +104,7 @@ TEST_CASE("structured bindings")
 
         SECTION("since C++17")
         {
-            auto [pos, was_inserted] = dict.insert(std::pair(2, "TWO"));
+            const auto [pos, was_inserted] = dict.insert(std::pair(2, "TWO"));
 
             REQUIRE(was_inserted == false);
         }
@@ -121,9 +121,67 @@ TEST_CASE("structured bindings")
 
     SECTION("struct/class")
     {
-        auto [error_code, error_message] = open_file();
+        const auto [error_code, error_message] = open_file();
 
         REQUIRE(error_code == 13);
         std::cout << error_message << "\n";
+    }
+}
+
+struct Timestamp
+{
+    int h, m, s;
+};
+
+TEST_CASE("structured bindings - how it works")
+{
+    Timestamp t1{10, 37, 0};
+
+    const auto& [hours, minutes, seconds] = t1;
+
+    REQUIRE(hours == 10);
+    REQUIRE(minutes == 37);
+    REQUIRE(seconds == 0);
+
+    SECTION("is interpreted as")
+    {
+        const auto& entity = t1;
+
+        auto&& hours = entity.h;
+        auto&& minutes = entity.m;
+        auto&& seconds = entity.s;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("use cases")
+{
+    std::map<int, std::string> dict = {{1, "one"}, {2, "two"}};
+   
+    SECTION("iteration over maps")
+    {
+
+        for(const auto& [key, value] : dict)
+        {
+            std::cout << key << " - " << value << "\n";
+        }
+    }
+
+    SECTION("insert in maps")
+    {
+        const auto [pos, was_inserted] = dict.insert(std::pair(2, "TWO"));
+
+        REQUIRE(was_inserted == false);
+    }
+
+    SECTION("many variables in for statement")
+    {
+        std::list<std::string> lst = {"zero", "one", "two", "three"};
+        
+        for(auto [index, it] = std::tuple(0, lst.begin()); it != lst.end(); ++it, ++index)
+        {
+            std::cout << "Item at index " << index << " - " << *it << "\n";
+        }
     }
 }
