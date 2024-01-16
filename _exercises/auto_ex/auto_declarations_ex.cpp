@@ -16,7 +16,7 @@ int main()
 {
 
     auto a1 = x;
-    static_assert(is_same<TODO, decltype(a1)>::value, "Error");
+    static_assert(is_same<int, decltype(a1)>::value, "Error");
 
     auto a2 = &x;
     static_assert(is_same<TODO, decltype(a2)>::value, "Error");
@@ -66,15 +66,15 @@ int main()
     const auto a16 = vec[0];
     static_assert(is_same<TODO, decltype(a16)>::value, "Error");
 
-    // auto&& a17 = 7.5;
-    // static_assert(is_same<TODO, decltype(a17)>::value, "Error");
+    auto&& a17 = 7.5;
+    static_assert(is_same<TODO, decltype(a17)>::value, "Error");
 
-    // auto&& a18 = crx;
-    // static_assert(is_same<TODO, decltype(a18)>::value, "Error");
+    auto&& a18 = crx;
+    static_assert(is_same<TODO, decltype(a18)>::value, "Error");
 
-    // auto&& a19 = vec.front();
-    // static_assert(is_same<TODO, decltype(a19)>::value, "Error");
+    auto&& a19 = vec.front();
+    static_assert(is_same<TODO, decltype(a19)>::value, "Error");
 
-    //auto&& a20 = vec.begin();
-    //static_assert(is_same<TODO, decltype(a20)>::value, "Error");
+    auto&& a20 = vec.begin();
+    static_assert(is_same<TODO, decltype(a20)>::value, "Error");
 }
