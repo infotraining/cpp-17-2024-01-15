@@ -111,5 +111,5 @@ TEST_CASE("constexpr in C++17")
 
     constexpr int lt_1000 = *Cpp20::find_if(lookup_table.begin(), lookup_table.end(), [](int x) { return x > 1000; });
 
-    //static_assert(lt_1000 == 1024);
+    static_assert(lt_1000 == 1024);
 }
