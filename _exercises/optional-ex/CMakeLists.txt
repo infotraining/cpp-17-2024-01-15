@@ -2,6 +2,7 @@
 # Target
 get_filename_component(DIRECTORY_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 string(REPLACE " " "_" TARGET_MAIN ${DIRECTORY_NAME})
+set(TARGET_MAIN ${TARGET_MAIN}_tests)
 
 ####################
 # Sources & headers
@@ -10,3 +11,5 @@ file(GLOB HEADERS_LIST "*.h" "*.hpp")
 
 add_executable(${TARGET_MAIN} ${SRC_LIST} ${HEADERS_LIST})
 target_link_libraries(${TARGET_MAIN} PRIVATE Catch2::Catch2WithMain)
+
+catch_discover_tests(${TARGET_MAIN})
