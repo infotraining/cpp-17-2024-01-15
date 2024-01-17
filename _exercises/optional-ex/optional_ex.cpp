@@ -4,47 +4,63 @@
 #include <optional>
 #include <string_view>
 
+
 // TODO
 
-// TEST_CASE("to_int returning optional")
-// {
-//     SECTION("happy path")
-//     {
-//         using namespace std::literals;
+[[nodiscard]] std::optional<int> to_int(std::string_view str)
+{
+    int value;
 
-//         SECTION("string to int")
-//         {
-//             auto result = to_int("123"s);
+    auto start = str.data();
+    auto end = str.data() + str.size();
 
-//             REQUIRE(result.has_value());
-//             REQUIRE(*result == 123);
-//         }
+    if (const auto [pos_end, error_code] = std::from_chars(start, end, value); error_code != std::errc{} || pos_end != end)
+    {
+        return std::nullopt;
+    }
 
-//         SECTION("const char* to int")
-//         {
-//             auto result = to_int("123");
+    return value;
+}
 
-//             REQUIRE(result.has_value());
-//             REQUIRE(*result == 123);
-//         }
-//     }
+TEST_CASE("to_int returning optional")
+{
+    SECTION("happy path")
+    {
+        using namespace std::literals;
 
-//     SECTION("sad path")
-//     {
-//         SECTION("whole string invalid")
-//         {
-//             auto result = to_int("a");
+        SECTION("string to int")
+        {
+            auto result = to_int("123"s);
 
-//             REQUIRE_FALSE(result.has_value());
-//         }
+            REQUIRE(result.has_value());
+            REQUIRE(*result == 123);
+        }
 
-//         SECTION("part of string is invalid")
-//         {
-//             using namespace std::literals;
+        SECTION("const char* to int")
+        {
+            auto result = to_int("123");
 
-//             auto result = to_int("123a4"sv);
+            REQUIRE(result.has_value());
+            REQUIRE(*result == 123);
+        }
+    }
 
-//             REQUIRE_FALSE(result.has_value());
-//         }
-//     }
-// }
+    SECTION("sad path")
+    {
+        SECTION("whole string invalid")
+        {
+            auto result = to_int("a");
+
+            REQUIRE_FALSE(result.has_value());
+        }
+
+        SECTION("part of string is invalid")
+        {
+            using namespace std::literals;
+
+            auto result = to_int("123a4"sv);
+
+            REQUIRE_FALSE(result.has_value());
+        }
+    }
+}
