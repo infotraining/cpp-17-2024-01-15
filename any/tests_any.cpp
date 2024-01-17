@@ -5,6 +5,7 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -54,6 +55,29 @@ TEST_CASE("any")
     }
 }
 
+struct DynamicMap{
+
+    std::map<std::string, std::any> data{};
+
+    template <typename T>
+    void insert(std::string key, T value) {
+        data.emplace(std::move(key), std::move(value));
+    }
+
+    template <typename T>
+    decltype(auto) get(const std::string& key)
+    {
+        if (auto* ptr_value = std::any_cast<T>(&data.at(key)))
+        {
+            return *ptr_value;
+        }  
+        else
+        {
+            throw std::bad_any_cast{};      
+        }
+    }
+};
+
 
 TEST_CASE("dynamic map")
 {
@@ -67,5 +91,35 @@ TEST_CASE("dynamic map")
     REQUIRE(dm.get<std::string>("name") == "Jan");
     REQUIRE_THROWS_AS(dm.get<int>("name"), std::bad_any_cast);
     REQUIRE(dm.get<double>("salary") == 10'000.99);
-    
+
+    dm.get<std::string>("name") = "Adam"s;
+    REQUIRE(dm.get<std::string>("name") == "Adam"s);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// auto vs. dectype(auto)
+
+template <typename TContainer>
+decltype(auto) get_nth(TContainer& container, size_t n)
+{
+    return container[n];
+}
+
+TEST_CASE("auto vs. decltype")
+{
+    const int cx = 10;
+    auto ax1 = cx; // int
+    decltype(auto) ax2 = cx;
+
+    const int& ref_cx = cx;
+    auto ax3 = ref_cx;
+    decltype(auto) another_ref = ref_cx;
+
+    std::vector<std::string> vec = {"one", "two", "three", "four"};
+    REQUIRE(get_nth(vec, 2) == "three");
+    get_nth(vec, 2) = "THREE";
+    REQUIRE(get_nth(vec, 2) == "THREE");
+
+    std::vector<bool> flags = {1, 1, 1, 1};
+    get_nth(flags, 2) = 0;
 }
