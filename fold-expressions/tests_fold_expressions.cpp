@@ -45,3 +45,22 @@ namespace BeforeCpp17
         return head + sum(tail...);
     }
 } // namespace BeforeCpp17
+
+/////////////////////////////////////////////////////////////////
+// templates with auto
+
+template <typename T, auto N>
+struct Array
+{
+    T items[N];
+};
+
+template <auto... Ns> struct ValueList { };
+
+TEST_CASE("templates with auto")
+{
+    Array<int, 42> arr1{};
+    Array<int, 42U> arr2{};
+
+    ValueList<1, 42U, 665L> vl{};
+}
