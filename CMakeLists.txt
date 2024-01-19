@@ -49,6 +49,7 @@ add_subdirectory(optional)
 add_subdirectory(any)
 add_subdirectory(variant)
 add_subdirectory(lambdas)
+add_subdirectory(parallel-stl)
 
 add_subdirectory(_exercises/constexpr-if-ex)
 add_subdirectory(_exercises/ctad-ex)
